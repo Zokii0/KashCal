@@ -1476,6 +1476,11 @@ class HomeViewModel(
             }
         }
         viewModelScope.launch {
+            dataStore.showMonthGridLines.collect { show ->
+                _uiState.update { it.copy(showMonthGridLines = show) }
+            }
+        }
+        viewModelScope.launch {
             dataStore.agendaWeekBarExpanded.collect { expanded ->
                 _uiState.update { it.copy(agendaWeekBarExpanded = expanded) }
             }
@@ -4858,6 +4863,11 @@ class HomeViewModel(
                 Result.failure(e)
             }
         }
+    }
+
+    /** Reloads the visible range after events of a subscription were hidden. */
+    fun onSubscribedEventsHidden() {
+        reloadCurrentView()
     }
 
     /**

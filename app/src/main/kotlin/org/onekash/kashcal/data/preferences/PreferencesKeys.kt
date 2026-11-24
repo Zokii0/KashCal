@@ -27,6 +27,9 @@ object PreferencesKeys {
     /** Shows week numbers in the calendar views. */
     val SHOW_WEEK_NUMBERS = booleanPreferencesKey("show_week_numbers")
 
+    /** Draws thin lines between the day cells of the full-height month view. */
+    val SHOW_MONTH_GRID_LINES = booleanPreferencesKey("show_month_grid_lines")
+
     /** Render the event form's tag row above the notes/attendees block. */
     val TAGS_ABOVE_NOTES = booleanPreferencesKey("tags_above_notes")
 
@@ -290,6 +293,12 @@ object PreferencesKeys {
      * [org.onekash.kashcal.data.db.entity.Calendar.isNotificationMuted] states for Room calendars.
      */
     val MUTED_DEVICE_CALENDAR_IDS = stringSetPreferencesKey("muted_device_calendar_ids")
+
+    /**
+     * Rules that hide events of ICS subscriptions and device calendars, one string per rule
+     * (`HiddenSubscriptionEvents` defines the format).
+     */
+    val HIDDEN_SUBSCRIPTION_EVENTS = stringSetPreferencesKey("hidden_subscription_events")
 
     /** KashCal fires reminders for device calendar events. */
     val DEVICE_CALENDAR_REMINDERS_ENABLED = booleanPreferencesKey("device_calendar_reminders_enabled")

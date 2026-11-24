@@ -182,6 +182,7 @@ fun SettingsRoute(
         val timeFormat by viewModel.timeFormat.collectAsStateWithLifecycle()
         val firstDayOfWeek by viewModel.firstDayOfWeek.collectAsStateWithLifecycle()
         val showWeekNumbers by viewModel.showWeekNumbers.collectAsStateWithLifecycle()
+        val showMonthGridLines by viewModel.showMonthGridLines.collectAsStateWithLifecycle()
         val showMultiDayTimedInAllDayStrip by viewModel.showMultiDayTimedInAllDayStrip.collectAsStateWithLifecycle()
         val widgetMaxEventsPerDay by viewModel.widgetMaxEventsPerDay.collectAsStateWithLifecycle()
         val widgetDetailedRows by viewModel.widgetDetailedRows.collectAsStateWithLifecycle()
@@ -208,6 +209,8 @@ fun SettingsRoute(
         val hasWriteCalendarPermission by viewModel.hasWriteCalendarPermission.collectAsStateWithLifecycle()
         val deviceCalendars by viewModel.deviceCalendars.collectAsStateWithLifecycle()
         val enabledDeviceCalendarIds by viewModel.enabledDeviceCalendarIds.collectAsStateWithLifecycle()
+        val hiddenEventsCount by viewModel.hiddenEventsCount.collectAsStateWithLifecycle()
+        val hiddenEvents by viewModel.hiddenEvents.collectAsStateWithLifecycle()
         val showDeclinedEvents by viewModel.showDeclinedEvents.collectAsStateWithLifecycle()
         val deviceCalendarRemindersEnabled by viewModel.deviceCalendarRemindersEnabled.collectAsStateWithLifecycle()
         val hiddenDeviceCalendarIds by viewModel.hiddenDeviceCalendarIds.collectAsStateWithLifecycle()
@@ -899,12 +902,18 @@ fun SettingsRoute(
                             onFirstDayOfWeekChange = viewModel::setFirstDayOfWeek,
                             showWeekNumbers = showWeekNumbers,
                             onShowWeekNumbersChange = viewModel::setShowWeekNumbers,
+                            showMonthGridLines = showMonthGridLines,
+                            onShowMonthGridLinesChange = viewModel::setShowMonthGridLines,
                             showMultiDayTimedInAllDayStrip = showMultiDayTimedInAllDayStrip,
                             onShowMultiDayTimedInAllDayStripChange = viewModel::setShowMultiDayTimedInAllDayStrip,
                             widgetMaxEventsPerDay = widgetMaxEventsPerDay,
                             onWidgetMaxEventsPerDayChange = viewModel::setWidgetMaxEventsPerDay,
                             widgetDetailedRows = widgetDetailedRows,
                             onWidgetDetailedRowsChange = viewModel::setWidgetDetailedRows,
+                            hiddenEventsCount = hiddenEventsCount,
+                            hiddenEvents = hiddenEvents,
+                            onRestoreHiddenEvent = viewModel::restoreHiddenEvent,
+                            onRestoreHiddenEvents = viewModel::restoreHiddenEvents,
                             // Version footer
                             versionName = BuildConfig.VERSION_NAME,
                             // Navigate to Accounts detail screen

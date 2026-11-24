@@ -1,5 +1,6 @@
 package org.onekash.kashcal.ui.viewmodels
 
+import org.onekash.kashcal.data.ics.HiddenSubscriptionEvents
 import org.onekash.kashcal.data.ics.IcsImportFile
 import org.onekash.kashcal.domain.ics.GroupPlan
 import org.onekash.kashcal.domain.ics.IcsImportResult
@@ -428,6 +429,16 @@ class AccountSettingsViewModel @Inject constructor(
     private val _enabledDeviceCalendarIds = MutableStateFlow<Set<Long>>(emptySet())
     val enabledDeviceCalendarIds: StateFlow<Set<Long>> = _enabledDeviceCalendarIds.asStateFlow()
 
+    private val _hiddenEventsCount = MutableStateFlow(0)
+
+    /** How many hide rules exist; the Settings row shows it and offers to restore them. */
+    val hiddenEventsCount: StateFlow<Int> = _hiddenEventsCount.asStateFlow()
+
+    private val _hiddenEvents = MutableStateFlow<List<HiddenSubscriptionEvents.Entry>>(emptyList())
+
+    /** The hidden-event rules, for the restore list. */
+    val hiddenEvents: StateFlow<List<HiddenSubscriptionEvents.Entry>> = _hiddenEvents.asStateFlow()
+
     private val _showDeclinedEvents = MutableStateFlow(false)
     val showDeclinedEvents: StateFlow<Boolean> = _showDeclinedEvents.asStateFlow()
 
@@ -486,6 +497,9 @@ class AccountSettingsViewModel @Inject constructor(
 
     private val _showWeekNumbers = MutableStateFlow(false)
     val showWeekNumbers: StateFlow<Boolean> = _showWeekNumbers.asStateFlow()
+
+    private val _showMonthGridLines = MutableStateFlow(false)
+    val showMonthGridLines: StateFlow<Boolean> = _showMonthGridLines.asStateFlow()
 
     private val _showMultiDayTimedInAllDayStrip =
         MutableStateFlow(PreferencesKeys.DEFAULT_SHOW_MULTIDAY_TIMED_IN_ALLDAY_STRIP)
@@ -785,6 +799,12 @@ class AccountSettingsViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            dataStore.hiddenSubscriptionEvents.collect { rules ->
+                _hiddenEventsCount.value = rules.size
+                _hiddenEvents.value = HiddenSubscriptionEvents.entries(rules)
+            }
+        }
+        viewModelScope.launch {
             dataStore.showDeclinedEvents.collect { show ->
                 _showDeclinedEvents.value = show
             }
@@ -875,6 +895,11 @@ class AccountSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             dataStore.showWeekNumbers.collect { show ->
                 _showWeekNumbers.value = show
+            }
+        }
+        viewModelScope.launch {
+            dataStore.showMonthGridLines.collect { show ->
+                _showMonthGridLines.value = show
             }
         }
         viewModelScope.launch {
@@ -1097,6 +1122,12 @@ class AccountSettingsViewModel @Inject constructor(
             // The month widget lays out its columns from this preference, so refresh the widgets
             // now instead of waiting for the next periodic update.
             widgetUpdateManager.updateAllWidgets("first_day_of_week_changed")
+        }
+    }
+
+    fun setShowMonthGridLines(show: Boolean) {
+        viewModelScope.launch {
+            dataStore.setShowMonthGridLines(show)
         }
     }
 
@@ -2383,6 +2414,22 @@ class AccountSettingsViewModel @Inject constructor(
             } else {
                 calendarProviderManager.onRemindersDisabled()
             }
+        }
+    }
+
+    /** Brings back the events of one hide rule, [HiddenSubscriptionEvents.Entry.rule]. */
+    fun restoreHiddenEvent(rule: String) {
+        viewModelScope.launch {
+            eventCoordinator.restoreHiddenEvent(rule)
+            calendarProviderManager.onDeviceCalendarSettingsChanged()
+        }
+    }
+
+    /** Brings back every hidden event, in subscriptions and in device calendars. */
+    fun restoreHiddenEvents() {
+        viewModelScope.launch {
+            eventCoordinator.restoreAllHiddenEvents()
+            calendarProviderManager.onDeviceCalendarSettingsChanged()
         }
     }
 

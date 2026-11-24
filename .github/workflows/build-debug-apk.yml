@@ -1,0 +1,45 @@
+# For your own fork only. Do NOT include this file in a pull request.
+# Builds a debug APK on demand (Actions tab -> "Debug APK" -> Run workflow) or on every push to test-build.
+name: Debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ test-build ]
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kashcal-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      # After the APK, so a failing test never costs you the APK.
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon
+        continue-on-error: true
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: app/build/reports/tests/
+          retention-days: 14

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
@@ -286,12 +287,18 @@ fun AccountSettingsScreen(
     onFirstDayOfWeekChange: (Int) -> Unit = {},
     showWeekNumbers: Boolean = false,
     onShowWeekNumbersChange: (Boolean) -> Unit = {},
+    showMonthGridLines: Boolean = false,
+    onShowMonthGridLinesChange: (Boolean) -> Unit = {},
     showMultiDayTimedInAllDayStrip: Boolean = PreferencesKeys.DEFAULT_SHOW_MULTIDAY_TIMED_IN_ALLDAY_STRIP,
     onShowMultiDayTimedInAllDayStripChange: (Boolean) -> Unit = {},
     widgetMaxEventsPerDay: Int = 5,
     onWidgetMaxEventsPerDayChange: (Int) -> Unit = {},
     widgetDetailedRows: Boolean = false,
     onWidgetDetailedRowsChange: (Boolean) -> Unit = {},
+    hiddenEventsCount: Int = 0,
+    hiddenEvents: List<org.onekash.kashcal.data.ics.HiddenSubscriptionEvents.Entry> = emptyList(),
+    onRestoreHiddenEvent: (String) -> Unit = {},
+    onRestoreHiddenEvents: () -> Unit = {},
     // Version footer
     versionName: String = "",
     // Settings search
@@ -512,6 +519,35 @@ fun AccountSettingsScreen(
                             )
                         }
 
+                        val hiddenEventsSubtitle = if (hiddenEventsCount == 0) stringResource(R.string.settings_hidden_events_none)
+                            else pluralStringResource(R.plurals.settings_hidden_events_count, hiddenEventsCount, hiddenEventsCount)
+                        row(label = stringResource(R.string.settings_hidden_events), subtitle = hiddenEventsSubtitle, id = "hidden-events") {
+                            var confirmRestore by remember { mutableStateOf(false) }
+                            SettingsRow(
+                                icon = Icons.Default.VisibilityOff,
+                                label = stringResource(R.string.settings_hidden_events),
+                                subtitle = hiddenEventsSubtitle,
+                                onClick = { if (hiddenEventsCount > 0) confirmRestore = true },
+                                showDivider = false,
+                                searchQuery = searchQuery
+                            )
+                            // Closes the list once the last rule is restored.
+                            androidx.compose.runtime.LaunchedEffect(hiddenEventsCount) {
+                                if (hiddenEventsCount == 0) confirmRestore = false
+                            }
+                            if (confirmRestore && hiddenEvents.isNotEmpty()) {
+                                org.onekash.kashcal.ui.components.HiddenEventsDialog(
+                                    entries = hiddenEvents,
+                                    onRestore = onRestoreHiddenEvent,
+                                    onRestoreAll = {
+                                        confirmRestore = false
+                                        onRestoreHiddenEvents()
+                                    },
+                                    onDismiss = { confirmRestore = false },
+                                )
+                            }
+                        }
+
                         val offlineCalendarsSubtitle = if (offlineCalendarCount <= 1) stringResource(R.string.offline_calendars_row_hint)
                             else pluralStringResource(R.plurals.calendar_count, offlineCalendarCount, offlineCalendarCount)
                         row(label = stringResource(R.string.offline_calendars_row_label), subtitle = offlineCalendarsSubtitle, id = "offline-calendars") {
@@ -618,6 +654,17 @@ fun AccountSettingsScreen(
                                 label = stringResource(R.string.settings_week_numbers),
                                 checked = showWeekNumbers,
                                 onCheckedChange = onShowWeekNumbersChange,
+                                showDivider = false,
+                                searchQuery = searchQuery
+                            )
+                        }
+
+                        row(label = stringResource(R.string.settings_month_grid_lines), id = "month-grid-lines") {
+                            SettingsToggleRow(
+                                icon = Icons.Default.DateRange,
+                                label = stringResource(R.string.settings_month_grid_lines),
+                                checked = showMonthGridLines,
+                                onCheckedChange = onShowMonthGridLinesChange,
                                 showDivider = false,
                                 searchQuery = searchQuery
                             )
